@@ -1,23 +1,10 @@
 # apps/dept/schemas.py
-
 from pydantic import BaseModel, Field
-from typing import Optional, List, Generic, TypeVar
+from typing import Optional, TypeVar
 from uuid import UUID
-from pydantic.generics import GenericModel
+from core.schemas.base import BaseResponse, ErrorResponse  # 引入公共模型
 
 T = TypeVar('T')
-
-
-class BaseResponse(BaseModel, Generic[T]):
-    code: int = 200
-    message: str = "success"
-    data: Optional[T] = None
-
-
-class ErrorResponse(BaseModel, Generic[T]):
-    code: int
-    message: str
-    detail: Optional[str] = None
 
 
 class DeptBase(BaseModel):
@@ -47,5 +34,3 @@ class DeptOut(DeptBase):
         json_encoders = {
             UUID: lambda v: str(v)
         }
-
-# DeptOut.model_rebuild()

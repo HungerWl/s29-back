@@ -23,6 +23,10 @@ from core.database import Base
 
 target_metadata = Base.metadata
 
+from app.user.models import User
+from app.post.models import Post
+from app.dept.models import Dept
+
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

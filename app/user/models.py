@@ -19,5 +19,5 @@ class User(Base):
     # 外键关联岗位（多对一）
     post_id = Column(String(36), ForeignKey("post.id"), index=True)
     # 关系字段（SQLAlchemy关系映射，非数据库字段）
-    dept  = relationship("Dept", back_populates="users")
-    post  = relationship("Post", back_populates="users")
+    dept = relationship("Dept", back_populates="users")
+    post = relationship("Post", back_populates="users")

@@ -1,24 +1,23 @@
 import uvicorn
-from fastapi import FastAPI
-from core.database import Base, engine
-from app.user.routers import user
-from app.user.models import User
-from app.post.models import Post
-from app.dept.models import Dept
+from fastapi import FastAPI, HTTPException
+
+# 统一导入所有模型
+from app.user import models as user_models
+from app.post import models as post_models
+from app.dept import models as dept_models
+
 from app.dept.routers import dept_router
 from app.post.routers import post_router
+from core.exceptions import BusinessException, business_exception_handler
 
 app = FastAPI()
 
+# 注册异常处理器
+app.add_exception_handler(BusinessException, business_exception_handler)
+
+# 注册路由
 app.include_router(dept_router)
-app.include_router(post_router)
-
-
-# 在应用启动时创建数据库表
-@app.on_event("startup")
-def startup_event():
-    Base.metadata.create_all(bind=engine)
-
+app.include_router(post_router, )
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Dict
 from app.post import schemas, crud
@@ -15,13 +15,8 @@ post_router = APIRouter(prefix="/post", tags=["岗位管理"])
     description="创建新岗位"
 )
 def create(dept_in: schemas.PostCreate, db: Session = Depends(get_db)):
-    try:
-        post = crud.create_post(db, dept_in)
-        return {"data": post}
-    except HTTPException as e:
-        raise e
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    post = crud.create_post(db, dept_in)
+    return {"data": post, "message": "岗位创建成功"}
 
 
 @post_router.get(
