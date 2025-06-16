@@ -26,6 +26,7 @@ target_metadata = Base.metadata
 from app.user.models import User
 from app.post.models import Post
 from app.dept.models import Dept
+from app.role.models import Role
 
 
 # other values from the config, defined by the needs of env.py,
