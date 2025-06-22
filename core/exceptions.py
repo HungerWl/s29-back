@@ -1,5 +1,5 @@
 from fastapi import status, Request
-from typing import Optional
+from typing import Optional, Union, Dict, List, Any
 from fastapi.responses import JSONResponse
 from fastapi import HTTPException
 
@@ -11,7 +11,7 @@ class BusinessException(Exception):
             self,
             entity: str,  # 实体类型，如"dept", "post"
             error_type: str,  # 错误类型，如"not_found", "exists"
-            details: Optional[str] = None,
+            details: Optional[Union[str, List[Dict[str, Any]]]] = None,  # 支持字符串或结构化数据
             status_code: int = status.HTTP_400_BAD_REQUEST
     ):
         # 预定义的错误类型映射表
