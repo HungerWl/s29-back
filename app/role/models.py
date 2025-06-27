@@ -8,13 +8,13 @@ import uuid  # 用于生成UUID
 # 定义Role角色模型类，继承自Base
 class Role(Base):
     # 指定数据库表名
-    __tablename__ = "role"
+    __tablename__ = "roles"
 
     # 主键ID字段，使用UUID作为唯一标识符
     # String(36)因为UUID通常为36个字符长度
     # default使用lambda函数生成UUID并转为字符串
-    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()), nullable=False, index=True)
+    
     # 角色名称字段
     # String(100)限制最大长度100字符
     # nullable=False表示不能为空

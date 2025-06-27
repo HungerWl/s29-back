@@ -28,9 +28,9 @@ class User(Base):
     remark = Column(String(255), nullable=True)
 
     # 外键关系
-    dept_id = Column(String(36), ForeignKey("dept.id"), nullable=True)
-    role_id = Column(String(36), ForeignKey("role.id"), nullable=True)
-    post_id = Column(String(36), ForeignKey("post.id"), nullable=True)
+    dept_id = Column(String(36), ForeignKey("depts.id"), nullable=True)
+    role_id = Column(String(36), ForeignKey("roles.id"), nullable=True)
+    post_id = Column(String(36), ForeignKey("posts.id"), nullable=True)
 
     # 关系字段
     dept = relationship("Dept", back_populates="users")

@@ -7,9 +7,9 @@ import uuid
 
 
 class Dept(Base):
-    __tablename__ = "dept"
+    __tablename__ = "depts"
 
-    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()), nullable=False)
 
     name = Column(String(100), nullable=False, unique=True, index=True)  # 部门名称
     code = Column(String(50), unique=True, index=True, nullable=True)  # 部门编码
@@ -19,7 +19,7 @@ class Dept(Base):
     is_active = Column(Boolean, default=True, nullable=False)  # 状态，启用/禁用
     remark = Column(String(255), nullable=True)  # 备注说明
 
-    parent_id = Column(String(36), ForeignKey("dept.id", ondelete="CASCADE"), nullable=True)  # 上级部门ID，支持树形结构
+    parent_id = Column(String(36), ForeignKey("depts.id", ondelete="CASCADE"), nullable=True)  # 上级部门ID
 
     # 关系映射
     users = relationship("User", back_populates="dept")
