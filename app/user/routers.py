@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from app.user import schemas, crud
 from core.database import get_db
@@ -6,6 +6,9 @@ from typing import List, Optional
 from core.exceptions import BusinessException
 from core.schemas.base import BaseResponse
 from uuid import UUID
+from fastapi.security import OAuth2PasswordRequestForm
+from core.auth import create_access_token, get_current_user  # 添加此行导入
+from pydantic import BaseModel
 
 user_router = APIRouter(prefix="/user", tags=["用户管理"])
 
@@ -78,3 +81,51 @@ def update_user(
         return {"data": updated_user, "message": "用户更新成功"}
     except BusinessException as e:
         raise e
+
+
+# 添加登录响应模型
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    user_info: schemas.UserOut
+
+
+@user_router.post("/login", response_model=BaseResponse[Token], summary="用户登录")
+def login(
+        form_data: OAuth2PasswordRequestForm = Depends(),
+        db: Session = Depends(get_db)
+):
+    user = crud.authenticate_user(db, form_data.username, form_data.password)
+    if not user:
+        raise BusinessException(
+            entity="用户",
+            error_type="认证失败",
+            status_code=status.HTTP_401_UNAUTHORIZED
+        )
+    # 创建访问令牌
+    access_token = create_access_token(data={"sub": user.username})
+    return {
+        "data": {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user_info": user
+        },
+        "message": "登录成功"
+    }
+
+
+# 修改现有路由添加认证保护，例如:
+@user_router.get(
+    "/list",
+    response_model=BaseResponse[List[schemas.UserOut]],
+    summary="获取用户列表",
+)
+def list_all(
+        dept_id: Optional[str] = None,
+        db: Session = Depends(get_db),
+        current_user=Depends(get_current_user)  # 添加认证依赖
+):
+    # 解决未使用提示（如打印用户名）
+    _ = current_user.username
+    users_list = crud.get_all_user(db, dept_id)
+    return {"data": users_list}

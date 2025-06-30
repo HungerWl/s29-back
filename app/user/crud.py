@@ -7,7 +7,8 @@ from core.exceptions import BusinessException
 from fastapi import status
 from sqlalchemy.exc import IntegrityError
 from typing import Optional, Union  # 新增Union导入
-
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError, InvalidHashError
 
 def get_user_by_username(db: Session, username: str):
     return db.query(user_models.User).filter(user_models.User.username == username).first()
@@ -65,6 +66,7 @@ def create_user(db: Session, user_in: schemas.UserCreate):
             status_code=status.HTTP_400_BAD_REQUEST
         )
     try:
+        ph = PasswordHasher()
         db_user = user_models.User(
             username=user_in.username,
             email=user_in.email,
@@ -76,7 +78,7 @@ def create_user(db: Session, user_in: schemas.UserCreate):
             dept_id=str(user_in.dept_id) if user_in.dept_id else None,
             role_id=str(user_in.role_id) if user_in.role_id else None,
             post_id=str(user_in.post_id) if user_in.post_id else None,
-            password=user_in.password  # 实际项目中应该使用密码哈希
+            password=ph.hash(user_in.password)  # 使用argon2加密密码
         )
 
         # 添加到数据库
@@ -242,3 +244,20 @@ def update_user(db: Session, user_id: UUID, user_update: schemas.UserUpdate):
             details=str(e),
             status_code=status.HTTP_400_BAD_REQUEST
         )
+
+
+# 添加密码验证函数
+def authenticate_user(db: Session, username: str, password: str):
+    user = get_user_by_username(db, username)
+    if not user:
+        return False
+    ph = PasswordHasher()
+    try:
+        ph.verify(user.password, password)
+        if ph.check_needs_rehash(user.password):
+            user.password = ph.hash(password)
+            db.commit()
+        return user
+    except (VerifyMismatchError, InvalidHashError):
+        # Handle both invalid password and invalid hash format
+        return False

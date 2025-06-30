@@ -1,6 +1,7 @@
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 
 # 统一导入所有模型
 from app.user import models as user_models
@@ -19,6 +20,15 @@ from core.exceptions import BusinessException, business_exception_handler
 from core.exception_handlers import validation_exception_handler
 
 app = FastAPI()
+
+# 添加CORS中间件（如果需要）
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 生产环境应指定具体域名
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # 注册异常处理器
 app.add_exception_handler(BusinessException, business_exception_handler)

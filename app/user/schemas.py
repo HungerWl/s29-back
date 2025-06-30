@@ -2,7 +2,6 @@ from pydantic import BaseModel, Field, model_validator
 from typing import Optional
 from uuid import UUID
 from enum import Enum
-from passlib.context import CryptContext
 
 
 class GenderEnum(str, Enum):
@@ -62,8 +61,14 @@ class UserUpdate(BaseModel):
         return values
 
 
-class UserOut(UserBase):
+class UserOut(BaseModel):
     id: UUID
+    username: str
+    email: str
+    nickname: Optional[str]
+    phone: str
+    gender: GenderEnum
+    is_active: bool
     is_superuser: bool = Field(False, description="是否超级用户")
     dept_id: Optional[UUID] = Field(None, description="部门ID")
     role_id: Optional[UUID] = Field(None, description="角色ID")
