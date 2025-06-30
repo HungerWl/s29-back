@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field, model_validator
 from typing import Optional
 from uuid import UUID
 from enum import Enum
+from passlib.context import CryptContext
 
 
 class GenderEnum(str, Enum):
