@@ -28,6 +28,7 @@ from app.post.models import Post
 from app.dept.models import Dept
 from app.role.models import Role
 from app.menu.models import Menu
+from app.document.models import Document
 
 
 # other values from the config, defined by the needs of env.py,

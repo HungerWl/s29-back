@@ -27,19 +27,6 @@ def create_user(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
         raise e
 
 
-@user_router.get(
-    "/list",
-    response_model=BaseResponse[List[schemas.UserOut]],
-    summary="获取用户列表",
-)
-def list_all(
-        dept_id: Optional[str] = None,  # 改为接受字符串类型
-        db: Session = Depends(get_db)
-):
-    users_list = crud.get_all_user(db, dept_id)
-    return {"data": users_list}
-
-
 @user_router.delete(
     "/delete/{user_id}",
     response_model=BaseResponse[schemas.UserOut],
@@ -102,13 +89,44 @@ def login(
             error_type="认证失败",
             status_code=status.HTTP_401_UNAUTHORIZED
         )
+
+    # 构建包含关联信息的用户数据
+    user_data = {
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "nickname": user.nickname,
+        "phone": user.phone,
+        "gender": user.gender.value,
+        "is_active": user.is_active,
+        "is_superuser": user.is_superuser,
+        "dept_id": user.dept_id,
+        "role_id": user.role_id,
+        "post_id": user.post_id,
+        # 部门信息
+        "dept_info": {
+            "id": user.dept.id,
+            "name": user.dept.name
+        } if user.dept else None,
+        # 角色信息
+        "role_info": {
+            "id": user.role.id,
+            "name": user.role.name
+        } if user.role else None,
+        # 岗位信息
+        "post_info": {
+            "id": user.post.id,
+            "name": user.post.name
+        } if user.post else None
+    }
+
     # 创建访问令牌
     access_token = create_access_token(data={"sub": user.username})
     return {
         "data": {
             "access_token": access_token,
             "token_type": "bearer",
-            "user_info": user
+            "user_info": user_data
         },
         "message": "登录成功"
     }
@@ -129,3 +147,24 @@ def list_all(
     _ = current_user.username
     users_list = crud.get_all_user(db, dept_id)
     return {"data": users_list}
+
+
+@user_router.post("/reset-password-by-info", response_model=BaseResponse, summary="通过账户信息重置密码")
+def reset_password_by_information(
+        request: schemas.PasswordResetByInfo,
+        db: Session = Depends(get_db)
+):
+    success = crud.reset_password_by_info(
+        db,
+        username=request.username,
+        email=request.email,
+        phone=request.phone,
+        new_password=request.new_password
+    )
+    if not success:
+        raise BusinessException(
+            entity="用户信息",
+            error_type="账户名、邮箱或手机号不匹配",
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+    return {"message": "密码重置成功，请使用新密码登录"}

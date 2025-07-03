@@ -9,9 +9,15 @@ from sqlalchemy.exc import IntegrityError
 from typing import Optional, Union  # 新增Union导入
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError, InvalidHashError
+from sqlalchemy.orm import Session, selectinload  # 确保已导入selectinload
+
 
 def get_user_by_username(db: Session, username: str):
-    return db.query(user_models.User).filter(user_models.User.username == username).first()
+    return db.query(user_models.User).options(
+        selectinload(user_models.User.dept),  # 加载部门关联
+        selectinload(user_models.User.role),  # 加载角色关联
+        selectinload(user_models.User.post)  # 加载岗位关联
+    ).filter(user_models.User.username == username).first()
 
 
 def get_user_by_email(db: Session, email: str):
@@ -261,3 +267,23 @@ def authenticate_user(db: Session, username: str, password: str):
     except (VerifyMismatchError, InvalidHashError):
         # Handle both invalid password and invalid hash format
         return False
+
+
+def verify_user_identity(db: Session, username: str, email: str, phone: str) -> Optional[user_models.User]:
+    """验证用户身份（账户名、邮箱、手机号匹配）"""
+    return db.query(user_models.User).filter(
+        user_models.User.username == username,
+        user_models.User.email == email,
+        user_models.User.phone == phone
+    ).first()
+
+
+def reset_password_by_info(db: Session, username: str, email: str, phone: str, new_password: str) -> bool:
+    """通过身份信息重置密码"""
+    user = verify_user_identity(db, username, email, phone)
+    if not user:
+        return False
+    ph = PasswordHasher()
+    user.password = ph.hash(new_password)
+    db.commit()
+    return True

@@ -30,6 +30,17 @@ def get_menu_tree(menu_id: Optional[int] = None, db: Session = Depends(get_db)):
     return {"data": menus, "message": "菜单获取成功"}
 
 
+@menu_router.get(
+    "/getRouter",
+    response_model=BaseResponse[List[schemas.MenuOut]],
+    summary="获取菜单树",
+    description="获取所有菜单并以树形结构返回"
+)
+def get_menu_tree(menu_id: Optional[int] = None, db: Session = Depends(get_db)):
+    menus = crud.get_menus_tree(db, menu_id)
+    return {"data": menus, "message": "菜单获取成功"}
+
+
 @menu_router.put(
     "/update/{menu_id}",
     response_model=BaseResponse[schemas.MenuOut],

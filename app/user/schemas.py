@@ -53,7 +53,7 @@ class UserUpdate(BaseModel):
     @model_validator(mode='before')
     @classmethod
     def check_required_fields(cls, values):
-        required_fields = ["username", "email", "phone", "password"]
+        required_fields = ["username", "email", "phone"]
         for field in required_fields:
             value = values.get(field)
             if value is None or (isinstance(value, str) and not value.strip()):
@@ -81,3 +81,10 @@ class UserOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class PasswordResetByInfo(BaseModel):
+    username: str = Field(..., description="账户名")
+    email: str = Field(..., description="邮箱")
+    phone: str = Field(..., min_length=11, max_length=20, description="手机号")
+    new_password: str = Field(..., min_length=6, max_length=128, description="新密码")

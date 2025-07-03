@@ -1,5 +1,5 @@
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -8,6 +8,7 @@ from app.user import models as user_models
 from app.post import models as post_models
 from app.dept import models as dept_models
 from app.menu import models as menu_models
+from app.document import models as document_models
 
 # 统一导入所有路由
 from app.dept.routers import dept_router
