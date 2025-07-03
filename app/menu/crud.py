@@ -38,15 +38,15 @@ def get_menus_tree(db: Session, menu_id: Optional[int] = None) -> List[menu_mode
     :return: 树形结构菜单列表
     """
     if menu_id:
-        # 查询指定菜单及其子菜单
+        # 查询指定菜单及其子菜单，添加排序
         menus = db.query(menu_models.Menu).options(
             joinedload(menu_models.Menu.children).joinedload(menu_models.Menu.children)
-        ).filter(menu_models.Menu.id == menu_id).all()
+        ).filter(menu_models.Menu.id == menu_id).order_by(menu_models.Menu.order_num).all()
     else:
-        # 查询所有顶级菜单及其子菜单
+        # 查询所有顶级菜单及其子菜单，添加排序
         menus = db.query(menu_models.Menu).options(
             joinedload(menu_models.Menu.children).joinedload(menu_models.Menu.children)
-        ).filter(menu_models.Menu.parent_id == None).all()
+        ).filter(menu_models.Menu.parent_id == None).order_by(menu_models.Menu.order_num).all()
 
     return menus
 

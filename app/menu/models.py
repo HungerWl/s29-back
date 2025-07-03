@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, Text, ForeignKey
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref  # 添加backref导入
 from core.database import Base
 
 
@@ -32,5 +32,5 @@ class Menu(Base):
     create_time = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     update_time = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'), onupdate=text('now()'))
 
-    # 关系字段
-    parent = relationship("Menu", remote_side="Menu.id", backref="children")
+    # 关系字段，修改关系字段，添加子菜单排序
+    parent = relationship("Menu", remote_side="Menu.id", backref=backref("children", order_by="Menu.order_num"))
